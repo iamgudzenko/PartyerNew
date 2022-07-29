@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <com.yandex.mapkit.mapview.MapView
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.yandex.mapkit.mapview.MapView>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_corners">
+
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/editSearch"
+                    android:hint="поиск по #хештегу"
+                    android:backgroundTint="@android:color/transparent"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/search"
+                    app:layout_constraintStart_toStartOf="parent"
+                    >
+                </EditText>
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/search"
+                    android:src="@drawable/search"
+                    android:background="@color/white"
+                    app:layout_constraintStart_toEndOf="@+id/editSearch"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                </ImageButton>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageButton
+                android:id="@+id/myLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/roundedbutton"
+                android:layout_marginBottom="100dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/user_home"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+            </ImageButton>
+
+            <ImageButton
+                android:id="@+id/minusZoom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="60dp"
+                android:background="@drawable/roundedbutton"
+                android:src="@drawable/minus"
+                app:layout_constraintBottom_toTopOf="@+id/myLocation"
+                app:layout_constraintEnd_toEndOf="parent">
+            </ImageButton>
+
+            <ImageButton
+                android:id="@+id/plusZoom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/roundedbutton"
+                android:src="@drawable/plus"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintBottom_toTopOf="@+id/minusZoom"
+                app:layout_constraintEnd_toEndOf="parent">
+
+            </ImageButton>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.bottomappbar.BottomAppBar
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            style="@style/Widget.MaterialComponents.BottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/bottomAppBar"
+            android:layout_gravity="bottom"
+            app:backgroundTint="@android:color/white"
+            app:contentInsetLeft="0dp"
+            app:contentInsetStart="0dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/buttonProfileUser"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/user"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/placeholder"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/placeholder"
+                    android:layout_width="70dp"
+                    android:layout_height="0dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/buttonProfileUser"
+                    app:layout_constraintEnd_toStartOf="@+id/placeholder1"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@+id/buttonProfileUser"
+                    app:layout_constraintTop_toTopOf="@+id/buttonProfileUser" />
+
+                <View
+                    android:id="@+id/placeholder1"
+                    android:layout_width="70dp"
+                    android:layout_height="0dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/placeholder"
+                    app:layout_constraintEnd_toStartOf="@+id/placeholder2"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@+id/placeholder"
+                    app:layout_constraintTop_toTopOf="@+id/buttonProfileUser" />
+                <View
+                    android:id="@+id/placeholder2"
+                    android:layout_width="70dp"
+                    android:layout_height="0dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/placeholder1"
+                    app:layout_constraintEnd_toStartOf="@+id/buttonMessages"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@+id/placeholder1"
+                    app:layout_constraintTop_toTopOf="@+id/buttonProfileUser" />
+
+
+                <ImageButton
+                    android:id="@+id/buttonMessages"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/messages"
+                    app:layout_constraintBottom_toBottomOf="@+id/buttonProfileUser"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toEndOf="@+id/placeholder2"
+                    app:layout_constraintTop_toTopOf="@+id/buttonProfileUser" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.bottomappbar.BottomAppBar>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonAddPlaceMark"
+            android:backgroundTint="@color/ha"
+            app:layout_anchor="@id/bottomAppBar"
+            android:src="@drawable/plus"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
