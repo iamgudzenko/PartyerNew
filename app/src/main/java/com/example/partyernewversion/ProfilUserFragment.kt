@@ -9,17 +9,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.partyernewversion.Model.Users
+import com.example.partyernewversion.Presenter.GetUserCurrentPresenter
+import com.example.partyernewversion.Presenter.IGetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.IProfilCurrentUser
 import com.example.partyernewversion.Presenter.ProfilCurrentUserPresenter
+import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.View.IProfilCurrentUserView
 import com.example.partyernewversion.databinding.FragmentProfilUserBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ProfilUserFragment : Fragment(), IProfilCurrentUserView {
+class ProfilUserFragment : Fragment(), IProfilCurrentUserView, IGetUserCurrentView {
     lateinit var binding:FragmentProfilUserBinding
     lateinit var profilUserPresenter: IProfilCurrentUser
+    lateinit var getUserCurrentPresenter: IGetUserCurrentPresenter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,8 +31,9 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView {
     ): View {
         binding = FragmentProfilUserBinding.inflate(layoutInflater)
         profilUserPresenter = ProfilCurrentUserPresenter(this)
+        getUserCurrentPresenter = GetUserCurrentPresenter(this)
         CoroutineScope(Dispatchers.IO).launch {
-            profilUserPresenter.getProfilUser()
+            getUserCurrentPresenter.getUserCurrenr()
         }
         binding.exitProfilUser.setOnClickListener {
             profilUserPresenter.exitProfilUser()
@@ -53,12 +58,12 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView {
         Toast.makeText((activity as ProfilCurrentUserActivity?)!! ,message,Toast.LENGTH_SHORT).show();
     }
 
-    override fun getProfilUserSuccess(userCurrent: Users?) {
-        binding.phoneNumberUser.text = userCurrent?.phoneNumber
-        binding.editChangeLogin.hint = userCurrent?.userLogin.toString()
+    override fun getCurrentUserSuccess(user: Users?) {
+        binding.phoneNumberUser.text = user?.phoneNumber
+        binding.editChangeLogin.hint = user?.userLogin.toString()
     }
 
-    override fun getProfilUserError(message: String) {
-        Toast.makeText(getActivity(),message,Toast.LENGTH_SHORT).show();
+    override fun getCurrentUserError(messages: String) {
+        Toast.makeText(getActivity(),messages,Toast.LENGTH_SHORT).show();
     }
 }

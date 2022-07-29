@@ -50,6 +50,11 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private lateinit var buttonAddPlaceMark:ImageButton
     lateinit var buttonProfileUser:ImageButton
 
+    private var latitudeTapPoint:Double = 0.0
+    private var longitudeTapPoint:Double = 0.0
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         MapKitFactory.setApiKey(MAPKIT_API_KEY)
         MapKitFactory.initialize(this)
@@ -86,7 +91,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             )
         }
         buttonAddPlaceMark.setOnClickListener {
-            bottomSheetCreate()
+            bottomSheetCreate(false)
         }
         buttonProfileUser.setOnClickListener {
             val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
@@ -220,7 +225,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         userLocationLayer.resetAnchor()
     }
 
-    fun bottomSheetCreate(){
+    fun bottomSheetCreate(isMapTapPoint: Boolean){
         val bottomSheetDialog = BottomSheetDialog(
             this, R.style.BottomSheetDialogTheme
         )
@@ -237,6 +242,18 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         buttonYes?.setOnClickListener {
             val intent = Intent(this@MainActivity, AddPlaceMarkActivity::class.java)
+            intent.putExtra("isMapTapPoint", isMapTapPoint)
+            if(isMapTapPoint) {
+                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()!!.target.latitude)
+                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()!!.target.longitude)
+                intent.putExtra("latitudeTapPoint", latitudeTapPoint)
+                intent.putExtra("longitudeTapPoint", longitudeTapPoint)
+            } else {
+                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()!!.target.latitude)
+                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()!!.target.longitude)
+            }
+
+
             startActivity(intent)
         }
         buttonCancelAddPlaceMark?.setOnClickListener {
@@ -245,7 +262,10 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     }
     override fun onMapTap(p0: Map, p1: Point) {
         Log.d("MAP_TAG", "point: " + p1.latitude + ", " + p1.longitude)
-        bottomSheetCreate()
+
+        latitudeTapPoint = p1.latitude
+        longitudeTapPoint = p1.longitude
+        bottomSheetCreate(true)
     }
 
     override fun onMapLongTap(p0: Map, p1: Point) {

@@ -14,6 +14,9 @@ import com.example.partyernewversion.View.IPhoneAuthView
 import com.example.partyernewversion.databinding.FragmentLogInBinding
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserView {
@@ -31,7 +34,9 @@ class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserVi
         phonePresenter = PhoneNumberAuthPresenter(this, (activity as ProfilCurrentUserActivity?)!!)
         otpPresenter = OtpPresenter(this, (activity as ProfilCurrentUserActivity?)!!)
         createProfilUserPresenter = CreateProfilUserPresenter(this)
-        phonePresenter.isSignedIn()
+        CoroutineScope(Dispatchers.IO).launch {
+            phonePresenter.isSignedIn()
+        }
 
         binding.butSendSms.setOnClickListener {
             phonePresenter.loginPhone(binding.editNumber.text.toString())

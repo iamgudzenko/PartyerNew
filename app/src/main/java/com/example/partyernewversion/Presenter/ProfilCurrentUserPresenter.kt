@@ -40,22 +40,22 @@ class ProfilCurrentUserPresenter(val profilUserView: IProfilCurrentUserView):IPr
         profilUserView.exitUser()
     }
 
-    override fun getProfilUser() {
-        ref = FirebaseDatabase.getInstance().reference
-        ref.child("Users").orderByChild("phoneNumber").equalTo(mAuth.currentUser?.phoneNumber.toString()).addListenerForSingleValueEvent(object :
-            ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (ds in snapshot.children) {
-                    val user: Users? = ds.getValue(Users::class.java)
-                    profilUserView.getProfilUserSuccess(user)
-                    break
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.w("ERROR", "Failed to read value.", error.toException())
-                profilUserView.getProfilUserError("Failed to read value." + error.toException())
-            }
-        })
-    }
+//    override fun getProfilUser() {
+//        ref = FirebaseDatabase.getInstance().reference
+//        ref.child("Users").orderByChild("phoneNumber").equalTo(mAuth.currentUser?.phoneNumber.toString()).addListenerForSingleValueEvent(object :
+//            ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                for (ds in snapshot.children) {
+//                    val user: Users? = ds.getValue(Users::class.java)
+//                    profilUserView.getProfilUserSuccess(user)
+//                    break
+//                }
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                Log.w("ERROR", "Failed to read value.", error.toException())
+//                profilUserView.getProfilUserError("Failed to read value." + error.toException())
+//            }
+//        })
+//    }
 }
