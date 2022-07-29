@@ -10,6 +10,7 @@ data class PlaceMark(
     val dateOfCreation:Any? = null,
     val timeEvent: Any? = null,
     val timeRemoveEvent:Any? = null,
+    val hashtagsList: List<String?> = emptyList(),
     val listUsersOfJoin:List<Users?> = emptyList()
 ) {
 }
