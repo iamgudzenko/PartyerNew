@@ -9,12 +9,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.LinearLayout
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.partyernewversion.Model.PlaceMark
+import com.example.partyernewversion.Presenter.placeMarkPresenters.GetPlaceMarkPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.IGetPlaceMarkPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.ISearchResultPlaseMarkPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.SearchResultPlaseMarkPresenter
+import com.example.partyernewversion.View.IGetPlaceMarkView
+import com.example.partyernewversion.View.ISearchResultPlaseMarkView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.Animation.Type.SMOOTH
@@ -31,14 +38,18 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.mapkit.user_location.UserLocationObjectListener
 import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
+import kotlinx.coroutines.*
 
-
-class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener {
+@OptIn(DelicateCoroutinesApi::class)
+class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView {
 
     private val requestPermissionLocation = 1
-    private val MAPKIT_API_KEY = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
+    private val mapApiKey = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
     private var mapView: MapView? = null
+    private var mapObjects: MapObjectCollection? = null
     private lateinit var userLocationLayer: UserLocationLayer
+    private lateinit var getPlaceMarkPresenter: IGetPlaceMarkPresenter
+    private lateinit var getSearchResultPlaceMarkPresenter: ISearchResultPlaseMarkPresenter
     private var routeStartLocation = Point(0.0, 0.0)
     private var pointZoom: Point? = null
     private var zoom = 0f
@@ -48,15 +59,18 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     private lateinit var userLocationButton:ImageButton
     private lateinit var buttonAddPlaceMark:ImageButton
-    lateinit var buttonProfileUser:ImageButton
+    private lateinit var buttonProfileUser:ImageButton
+    private lateinit var editSearch:EditText
 
     private var latitudeTapPoint:Double = 0.0
     private var longitudeTapPoint:Double = 0.0
-
-
+    private var mapObjectHashMap = HashMap<String, MapObject>()
+    private var idPlaceMarkSort = HashMap<PlaceMark?, Double>()
+    private lateinit var adapterHashtagListAdapter: HashtagListAdapter
+    private var bottomSheetDialogInfoPlace: BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        MapKitFactory.setApiKey(MAPKIT_API_KEY)
+        MapKitFactory.setApiKey(mapApiKey)
         MapKitFactory.initialize(this)
 
         setContentView(R.layout.activity_main)
@@ -65,12 +79,36 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         mapView = findViewById<View>(R.id.mapview) as MapView
         mapView!!.map.addInputListener(this)
+        mapObjects = mapView!!.map.mapObjects
+
+        mapView!!.map.move(CameraPosition(Point(59.935446, 30.317179), 12f, 0f, 0f))
+
+        getPlaceMarkPresenter = GetPlaceMarkPresenter(this)
+        getSearchResultPlaceMarkPresenter = SearchResultPlaseMarkPresenter(this)
+
         userLocationButton = findViewById(R.id.myLocation)
         buttonAddPlaceMark = findViewById(R.id.buttonAddPlaceMark)
         buttonProfileUser = findViewById(R.id.buttonProfileUser)
+        editSearch = findViewById(R.id.editSearch)
+        val deleteHashtagEdit = findViewById<ImageButton>(R.id.deletHashtag)
+        val searchButton= findViewById<ImageButton>(R.id.search)
 
         checkPermission()
         userInterface()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            getPlaceMarkPresenter.getAllPlaceMarks()
+            getPlaceMarkPresenter.updatePlaceMark()
+        }
+        adapterHashtagListAdapter = HashtagListAdapter(object: HashtagsActionListener{
+            override fun goToHashtagMark(hashtag: String?) {
+                hashtagShowInMap(hashtag.toString())
+                mapObjects?.clear()
+                idPlaceMarkSort.clear()
+                bottomSheetDialogInfoPlace!!.hide()
+                editSearch.setText("#$hashtag")
+            }
+        })
 
         val minusZoomButton = findViewById<ImageButton>(R.id.minusZoom)
         val plusZoomButton = findViewById<ImageButton>(R.id.plusZoom)
@@ -97,8 +135,27 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
             startActivity(intent)
         }
+        searchButton.setOnClickListener {
+            mapObjects?.clear()
+            idPlaceMarkSort.clear()
+            if (editSearch.text.isNotEmpty()) {
+                getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(editSearch.text.toString())
+            }
+        }
+        deleteHashtagEdit.setOnClickListener {
+            editSearch.setText("")
+            deleteHashtagEdit.visibility = View.INVISIBLE
+            GlobalScope.launch(Dispatchers.IO) {
+                getPlaceMarkPresenter.getAllPlaceMarks()
+                getPlaceMarkPresenter.updatePlaceMark()
+            }
+        }
+
     }
 
+    private fun hashtagShowInMap(hashtag:String) {
+        getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(hashtag)
+    }
     private fun checkPermission() {
         val permissionLocation =
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -134,8 +191,9 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         userLocationButton.setOnClickListener {
             if (permissionLocation) {
-                cameraUserPosition()
-
+                GlobalScope.launch(Dispatchers.Main) {
+                    cameraUserPosition()
+                }
                 followUserLocation = true
             } else {
                 checkPermission()
@@ -155,6 +213,8 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         cameraUserPosition()
 
         permissionLocation = true
+
+
     }
 
     private fun cameraUserPosition() {
@@ -163,9 +223,9 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             mapView!!.map.move(
                 CameraPosition(routeStartLocation, 16f, 0f, 0f), Animation(SMOOTH, 1f), null
             )
-        } else {
-            mapView!!.map.move(CameraPosition(Point(0.0, 0.0), 16f, 0f, 0f))
+
         }
+
     }
 
     override fun onStop() {
@@ -182,7 +242,6 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun onObjectAdded(p0: UserLocationView) {
         setAnchor()
-
         p0.pin.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
         p0.arrow.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
         p0.accuracyCircle.fillColor = Color.BLUE
@@ -218,6 +277,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             PointF((mapView!!.width * 0.5).toFloat(), (mapView!!.height * 0.5).toFloat()),
             PointF((mapView!!.width * 0.5).toFloat(), (mapView!!.height * 0.83).toFloat())
         )
+        userLocationLayer.isHeadingEnabled = false
         followUserLocation = false
     }
 
@@ -225,15 +285,15 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         userLocationLayer.resetAnchor()
     }
 
-    fun bottomSheetCreate(isMapTapPoint: Boolean){
+    private fun bottomSheetCreate(isMapTapPoint: Boolean){
         val bottomSheetDialog = BottomSheetDialog(
             this, R.style.BottomSheetDialogTheme
         )
-        val bottonSheetView = LayoutInflater.from(applicationContext).inflate(
+        val bottomSheetView = LayoutInflater.from(applicationContext).inflate(
             R.layout.layout_bottom_sheet,
             findViewById<LinearLayout>(R.id.bottomSheetContainer)
         )
-        bottomSheetDialog.setContentView(bottonSheetView)
+        bottomSheetDialog.setContentView(bottomSheetView)
         bottomSheetDialog.show()
 
         val buttonYes = bottomSheetDialog.findViewById<Button>(R.id.buttonYes)
@@ -244,17 +304,16 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             val intent = Intent(this@MainActivity, AddPlaceMarkActivity::class.java)
             intent.putExtra("isMapTapPoint", isMapTapPoint)
             if(isMapTapPoint) {
-                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()!!.target.latitude)
-                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()!!.target.longitude)
+                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()?.target?.latitude)
+                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()?.target?.longitude)
                 intent.putExtra("latitudeTapPoint", latitudeTapPoint)
                 intent.putExtra("longitudeTapPoint", longitudeTapPoint)
             } else {
-                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()!!.target.latitude)
-                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()!!.target.longitude)
+                intent.putExtra("userLatitude", userLocationLayer.cameraPosition()?.target?.latitude)
+                intent.putExtra("userLongitude", userLocationLayer.cameraPosition()?.target?.longitude)
             }
-
-
             startActivity(intent)
+
         }
         buttonCancelAddPlaceMark?.setOnClickListener {
             bottomSheetDialog.hide()
@@ -270,6 +329,82 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun onMapLongTap(p0: Map, p1: Point) {
 
+    }
+
+    override fun showPlaceMark(mark: PlaceMark?) {
+        val pointMark = Point(mark?.latitude!!.toDouble(), mark.longitude!!.toDouble())
+
+        val viewPlaceMark: PlacemarkMapObject = mapObjects!!.addPlacemark(
+            pointMark, ImageProvider.fromResource(
+                this, R.drawable.star_placemark
+            )
+        )
+        viewPlaceMark.userData = mark.id
+        mapObjectHashMap[mark.id.toString()] = viewPlaceMark
+        viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
+    }
+    private val placeMarkMapObjectTapListener =
+        MapObjectTapListener { mapObject, _ ->
+            bottomSheetDialogInfoPlace = BottomSheetDialog(
+                this@MainActivity, R.style.BottomSheetDialogTheme
+            )
+            val bottomSheetView: View = LayoutInflater.from(applicationContext).inflate(
+                R.layout.layout_place_mark_info_bottom_sheet,
+                findViewById<LinearLayout>(R.id.bottomSheetContainerInfo)
+            )
+            bottomSheetDialogInfoPlace?.setContentView(bottomSheetView)
+            getPlaceMarkPresenter.getInfoPlaceMark(mapObject.userData.toString())
+            Log.w("TAP", mapObject.userData.toString())
+            bottomSheetDialogInfoPlace?.show()
+            true
+        }
+    override fun errorGetPlaceMark(message: String) {
+
+    }
+
+    override fun showInfoPlaceMark(mark: PlaceMark?) {
+
+        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textNamePlacemark)?.text = mark?.name
+        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textDescriptionPlacemark)?.text = mark?.description
+        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeEvent)?.text = mark?.timeEvent.toString()
+        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeRemove)?.text = mark?.timeRemoveEvent.toString()
+        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.loginUserOnwer)?.text = "@${mark?.userOwner?.userLogin}"
+        val list = mark?.hashtagsList?.toMutableList()
+        list?.remove("")
+        createViewHashtags(list.orEmpty())
+    }
+    private fun createViewHashtags(listHashtags:List<String?>) {
+
+        adapterHashtagListAdapter.hashtags = listHashtags
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        val recyclerView = bottomSheetDialogInfoPlace?.findViewById<RecyclerView>(R.id.recyclerViewHashtagsList)
+        recyclerView?.layoutManager = layoutManager
+        recyclerView?.adapter = adapterHashtagListAdapter
+        recyclerView?.scrollToPosition(adapterHashtagListAdapter.itemCount - 1)
+
+    }
+    override fun removePlaceMarkOnMap(idPlaceMark: String) {
+        mapObjects?.remove(mapObjectHashMap[idPlaceMark]!!)
+    }
+
+    override fun showResultSearchPlaceMark(mark: PlaceMark?) {
+//        val lat = userLocationLayer.cameraPosition()?.target?.latitude
+//        val lon = userLocationLayer.cameraPosition()?.target?.longitude
+//        val distance = sqrt(lon!!.minus(lat!!).pow(2.0) + mark?.longitude!!.minus(mark.latitude!!).pow(2.0))
+//        idPlaceMarkSort.put(mark, distance)
+        val deleteHashtagEdit = findViewById<ImageButton>(R.id.deletHashtag)
+        deleteHashtagEdit.visibility = View.VISIBLE
+
+        val pointMark = Point(mark?.latitude!!.toDouble(), mark.longitude!!.toDouble())
+
+        val viewPlaceMark: PlacemarkMapObject = mapObjects!!.addPlacemark(
+            pointMark, ImageProvider.fromResource(
+                this, R.drawable.like_placemark
+            )
+        )
+        viewPlaceMark.userData = mark.id
+        mapObjectHashMap[mark.id.toString()] = viewPlaceMark
+        viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
     }
 
 }

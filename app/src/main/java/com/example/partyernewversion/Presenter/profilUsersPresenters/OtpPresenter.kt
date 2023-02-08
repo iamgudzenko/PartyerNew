@@ -1,4 +1,4 @@
-package com.example.partyernewversion.Presenter
+package com.example.partyernewversion.Presenter.profilUsersPresenters
 
 import android.app.Activity
 import android.util.Log
@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 
-class OtpPresenter(val otpView: IOtpView, val activity: Activity):IOtpPresenter {
+class OtpPresenter(val otpView: IOtpView, val activity: Activity): IOtpPresenter {
     val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
     override fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {

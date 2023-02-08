@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
     <com.yandex.mapkit.mapview.MapView
         android:id="@+id/mapview"
         android:layout_width="match_parent"
@@ -44,12 +45,25 @@
                     >
                 </EditText>
                 <ImageButton
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/deletHashtag"
+                    android:src="@drawable/delete_hashtag_icon"
+                    android:background="@color/white"
+                    android:visibility="invisible"
+                    app:layout_constraintStart_toEndOf="@+id/editSearch"
+                    app:layout_constraintEnd_toStartOf="@id/search"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                </ImageButton>
+                <ImageButton
                     android:layout_width="50dp"
                     android:layout_height="0dp"
                     android:id="@+id/search"
                     android:src="@drawable/search"
                     android:background="@color/white"
-                    app:layout_constraintStart_toEndOf="@+id/editSearch"
+                    app:layout_constraintStart_toEndOf="@+id/deletHashtag"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent">

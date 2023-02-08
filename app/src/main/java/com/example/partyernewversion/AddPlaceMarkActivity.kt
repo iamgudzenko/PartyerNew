@@ -1,15 +1,16 @@
 package com.example.partyernewversion
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.partyernewversion.Model.Users
-import com.example.partyernewversion.Presenter.CreatePlaceMarkPresenter
-import com.example.partyernewversion.Presenter.GetUserCurrentPresenter
-import com.example.partyernewversion.Presenter.ICreatePlaceMarkPresenter
-import com.example.partyernewversion.Presenter.IGetUserCurrentPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.CreatePlaceMarkPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.ICreatePlaceMarkPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
 import com.example.partyernewversion.View.ICreatePlaceMarkView
 import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.databinding.ActivityAddPlaceMarkBinding
@@ -57,11 +58,11 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
                 ) {
                     // Получаем выбранный объект
                     val item = parent.getItemAtPosition(position) as String
-                    if (item == spinerrText.get(1)) {
+                    if (item == spinerrText[1]) {
                         latitude = arguments.getDouble("userLatitude")
                         longitude = arguments.getDouble("userLongitude")
-                    } else if (item == spinerrText.get(2)) {
-                        //Переход на выбор точки
+                    } else if (item == spinerrText[2]) {
+                    //Переход на выбор точки
 //                        val intent = Intent(this@AddNewPlaceMark, PointSelectionMap::class.java)
 //                        startActivity(intent)
                     }
@@ -69,17 +70,34 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-        binding.spinner.setOnItemSelectedListener(itemSelectedListener)
+        binding.spinner.onItemSelectedListener = itemSelectedListener
 
         binding.buttonCreatePlace.setOnClickListener {
-            createPlaceMarkPresenter.createPlaceMark(binding.editNameMark.text.toString(),
-                binding.editDesctiption.text.toString(),
-                userCurrent,
-                latitude,
-                longitude,
-                binding.editTimeEvent.text.toString(),
-                binding.editTimeRemoveEvent.text.toString(),
-                binding.editHashtags.text.toString())
+            if (binding.editNameMark.text.toString().isNotEmpty()
+                && binding.editDesctiption.text.toString().isNotEmpty()
+                && binding.editTimeEvent.text.toString().isNotEmpty()
+                && binding.editTimeRemoveEvent.text.toString().isNotEmpty()
+            ) {
+                if (binding.editTimeEvent.text.toString().matches(Regex("([01]?[0-9]|2[0-3]):[0-5][0-9]"))) {
+                    if (binding.editTimeRemoveEvent.text.toString().toInt() in 1..24) {
+                        createPlaceMarkPresenter.createPlaceMark(binding.editNameMark.text.toString(),
+                        binding.editDesctiption.text.toString(),
+                        userCurrent,
+                        latitude,
+                        longitude,
+                        binding.editTimeEvent.text.toString(),
+                        binding.editTimeRemoveEvent.text.toString(),
+                        binding.editHashtags.text.toString())
+                    } else {
+                        binding.editTimeRemoveEvent.error = "от 1 до 24 ч"
+                    }
+
+                } else {
+                    binding.editTimeEvent.error = "неккоректное время"
+                }
+            } else {
+                binding.textView.text = "не оставляйте поля пустыми"
+            }
         }
 
     }
@@ -90,7 +108,9 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
     }
 
     override fun createPlaceMarkSuccess(message: String) {
-
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     override fun getCurrentUserSuccess(user: Users?) {
@@ -98,6 +118,6 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
     }
 
     override fun getCurrentUserError(messages: String) {
-        TODO("Not yet implemented")
+
     }
 }

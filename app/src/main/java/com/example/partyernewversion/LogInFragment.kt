@@ -5,18 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.partyernewversion.Presenter.*
+import com.example.partyernewversion.Presenter.profilUsersPresenters.*
 import com.example.partyernewversion.View.ICreateProfilUsserView
 import com.example.partyernewversion.View.IOtpView
 import com.example.partyernewversion.View.IPhoneAuthView
 import com.example.partyernewversion.databinding.FragmentLogInBinding
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
 class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserView {
@@ -26,6 +23,7 @@ class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserVi
     lateinit var createProfilUserPresenter: ICreateProfilUserPresenter
     lateinit var storedVerification: String
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -34,12 +32,14 @@ class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserVi
         phonePresenter = PhoneNumberAuthPresenter(this, (activity as ProfilCurrentUserActivity?)!!)
         otpPresenter = OtpPresenter(this, (activity as ProfilCurrentUserActivity?)!!)
         createProfilUserPresenter = CreateProfilUserPresenter(this)
-        CoroutineScope(Dispatchers.IO).launch {
+        GlobalScope.launch(Dispatchers.IO) {
             phonePresenter.isSignedIn()
         }
 
         binding.butSendSms.setOnClickListener {
-            phonePresenter.loginPhone(binding.editNumber.text.toString())
+            GlobalScope.launch(Dispatchers.IO) {
+                phonePresenter.loginPhone(binding.editNumber.text.toString())
+            }
             binding.inputPhoneNumber.visibility = View.GONE
             binding.otpInput.visibility = View.VISIBLE
         }
@@ -71,7 +71,7 @@ class LogInFragment : Fragment(), IPhoneAuthView, IOtpView, ICreateProfilUsserVi
     }
 
     override fun afterVerification(message: String) {
-        (activity as ProfilCurrentUserActivity?)!!.openFragment(ProfilUserFragment())
+//        (activity as ProfilCurrentUserActivity?)!!.openFragment(ProfilUserFragment())
         Log.w("FUN", "afterVerification")
     }
 

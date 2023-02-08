@@ -1,7 +1,6 @@
-package com.example.partyernewversion.Presenter
+package com.example.partyernewversion.Presenter.profilUsersPresenters
 
 import android.util.Log
-import com.example.partyernewversion.Model.Users
 import com.example.partyernewversion.View.IProfilCurrentUserView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -9,7 +8,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ProfilCurrentUserPresenter(val profilUserView: IProfilCurrentUserView):IProfilCurrentUser {
+class ProfilCurrentUserPresenter(val profilUserView: IProfilCurrentUserView): IProfilCurrentUser {
     val mAuth= FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance()
     var ref = database.reference

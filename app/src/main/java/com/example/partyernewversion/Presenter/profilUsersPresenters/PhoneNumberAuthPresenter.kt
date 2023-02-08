@@ -1,4 +1,4 @@
-package com.example.partyernewversion.Presenter
+package com.example.partyernewversion.Presenter.profilUsersPresenters
 
 import android.app.Activity
 import android.util.Log
@@ -10,7 +10,8 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import java.util.concurrent.TimeUnit
 
-class PhoneNumberAuthPresenter (val phoneAuthView: IPhoneAuthView, val activity: Activity):IPhoneNumberAuthPresenter{
+class PhoneNumberAuthPresenter (val phoneAuthView: IPhoneAuthView, val activity: Activity):
+    IPhoneNumberAuthPresenter {
     val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
     lateinit var storedVerificationId:String
     lateinit var resendToken: PhoneAuthProvider.ForceResendingToken

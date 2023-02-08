@@ -1,11 +1,12 @@
-package com.example.partyernewversion.Presenter
+package com.example.partyernewversion.Presenter.profilUsersPresenters
 
 import com.example.partyernewversion.Model.Users
 import com.example.partyernewversion.View.ICreateProfilUsserView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
-class CreateProfilUserPresenter(val createProfilUsserView: ICreateProfilUsserView) : ICreateProfilUserPresenter {
+class CreateProfilUserPresenter(val createProfilUsserView: ICreateProfilUsserView) :
+    ICreateProfilUserPresenter {
     var database = FirebaseDatabase.getInstance()
     val mAuth= FirebaseAuth.getInstance()
 

@@ -1,4 +1,4 @@
-package com.example.partyernewversion.Presenter
+package com.example.partyernewversion.Presenter.profilUsersPresenters
 
 interface IProfilCurrentUser {
     fun cangeLoginProfilUser(login: String)

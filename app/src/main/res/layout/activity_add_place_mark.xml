@@ -23,7 +23,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout"
+            android:id="@+id/textInputLayoutName"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout2"
+            android:id="@+id/textInputLayoutDescription"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:hint="Описание"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutName"
             app:startIconDrawable="@drawable/description_place_mark_icon">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -67,7 +67,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout3"
+            android:id="@+id/textInputLayoutLocation"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
             android:hint="Место"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutDescription">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout5"
+            android:id="@+id/textInputLayoutTimeEvent"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,7 +108,7 @@
             android:hint="Во сколько?"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout3"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutLocation"
             app:startIconDrawable="@drawable/icon_time_event">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -124,7 +124,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout7"
+            android:id="@+id/textInputLayoutTimeRemove"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
             android:hint="Удалить через"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout5"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutTimeEvent"
             app:startIconDrawable="@drawable/icon_time_remove_event">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -151,15 +151,15 @@
             android:id="@+id/textInfo"
             android:layout_marginTop="15dp"
             android:text="Добавьте парочку хештегов"
-            app:layout_constraintBottom_toTopOf="@+id/textInputLayout6"
+            app:layout_constraintBottom_toTopOf="@+id/textInputLayoutHashtags"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout7">
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutTimeRemove">
 
         </TextView>
         <com.google.android.material.textfield.TextInputLayout
 
-            android:id="@+id/textInputLayout6"
+            android:id="@+id/textInputLayoutHashtags"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
