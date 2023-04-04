@@ -88,6 +88,7 @@ class GetPlaceMarkPresenter(val getPlaceMarkView: IGetPlaceMarkView) : IGetPlace
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
+                Log.w("REMPresent", "REmove in GetPlaceMarkPresrnter")
                 getPlaceMarkView.removePlaceMarkOnMap(snapshot?.key.toString())
             }
             override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {

@@ -16,11 +16,15 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.partyernewversion.Model.PlaceMark
+import com.example.partyernewversion.Model.Users
 import com.example.partyernewversion.Presenter.placeMarkPresenters.GetPlaceMarkPresenter
 import com.example.partyernewversion.Presenter.placeMarkPresenters.IGetPlaceMarkPresenter
 import com.example.partyernewversion.Presenter.placeMarkPresenters.ISearchResultPlaseMarkPresenter
 import com.example.partyernewversion.Presenter.placeMarkPresenters.SearchResultPlaseMarkPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
 import com.example.partyernewversion.View.IGetPlaceMarkView
+import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.View.ISearchResultPlaseMarkView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.yandex.mapkit.Animation
@@ -39,16 +43,21 @@ import com.yandex.mapkit.user_location.UserLocationObjectListener
 import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @OptIn(DelicateCoroutinesApi::class)
-class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView {
+class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView,
+    IGetUserCurrentView {
 
     private val requestPermissionLocation = 1
     private val mapApiKey = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
+    var userCurrent: Users? = null
     private var mapView: MapView? = null
     private var mapObjects: MapObjectCollection? = null
     private lateinit var userLocationLayer: UserLocationLayer
     private lateinit var getPlaceMarkPresenter: IGetPlaceMarkPresenter
+    lateinit var getUserCurrentPresenter: IGetUserCurrentPresenter
     private lateinit var getSearchResultPlaceMarkPresenter: ISearchResultPlaseMarkPresenter
     private var routeStartLocation = Point(0.0, 0.0)
     private var pointZoom: Point? = null
@@ -82,7 +91,8 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         mapObjects = mapView!!.map.mapObjects
 
         mapView!!.map.move(CameraPosition(Point(59.935446, 30.317179), 12f, 0f, 0f))
-
+        getUserCurrentPresenter = GetUserCurrentPresenter(this)
+        getUserCurrentPresenter.getUserCurrenr()
         getPlaceMarkPresenter = GetPlaceMarkPresenter(this)
         getSearchResultPlaceMarkPresenter = SearchResultPlaseMarkPresenter(this)
 
@@ -95,6 +105,13 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         checkPermission()
         userInterface()
+
+//        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(java.lang.Runnable {
+//            // your code here
+//            mapObjects?.clear()
+//            idPlaceMarkSort.clear()
+//            getPlaceMarkPresenter.getAllPlaceMarks()
+//        }, 0, 5, TimeUnit.SECONDS)
 
         GlobalScope.launch(Dispatchers.IO) {
             getPlaceMarkPresenter.getAllPlaceMarks()
@@ -333,12 +350,19 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun showPlaceMark(mark: PlaceMark?) {
         val pointMark = Point(mark?.latitude!!.toDouble(), mark.longitude!!.toDouble())
-
-        val viewPlaceMark: PlacemarkMapObject = mapObjects!!.addPlacemark(
+        var viewPlaceMark: PlacemarkMapObject = mapObjects!!.addPlacemark(
             pointMark, ImageProvider.fromResource(
-                this, R.drawable.star_placemark
+                this, R.drawable.empty_placemark
             )
         )
+        if(mark.userOwner?.phoneNumber == userCurrent?.phoneNumber) {
+            viewPlaceMark = mapObjects!!.addPlacemark(
+                pointMark, ImageProvider.fromResource(
+                    this, R.drawable.star_placemark
+                )
+            )
+        }
+
         viewPlaceMark.userData = mark.id
         mapObjectHashMap[mark.id.toString()] = viewPlaceMark
         viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
@@ -384,7 +408,8 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     }
     override fun removePlaceMarkOnMap(idPlaceMark: String) {
-        mapObjects?.remove(mapObjectHashMap[idPlaceMark]!!)
+        Log.w("REMView", mapObjectHashMap[idPlaceMark]!!.userData.toString())
+        mapObjects!!.remove(mapObjectHashMap[idPlaceMark]!!)
     }
 
     override fun showResultSearchPlaceMark(mark: PlaceMark?) {
@@ -405,6 +430,14 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         viewPlaceMark.userData = mark.id
         mapObjectHashMap[mark.id.toString()] = viewPlaceMark
         viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
+    }
+
+    override fun getCurrentUserSuccess(user: Users?) {
+        userCurrent = user
+    }
+
+    override fun getCurrentUserError(messages: String) {
+
     }
 
 }
