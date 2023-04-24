@@ -5,4 +5,5 @@ import com.example.partyernewversion.Model.Users
 interface IGetUserCurrentView {
     fun getCurrentUserSuccess(user:Users?)
     fun getCurrentUserError(messages: String)
+    fun isSignedIn(isSignedIn: Boolean)
 }

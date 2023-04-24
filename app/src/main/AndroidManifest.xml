@@ -14,7 +14,10 @@
         android:theme="@style/Theme.PartyerNewVersion"
         tools:targetApi="31">
         <activity
-            android:name=".MessendgerActivity"
+            android:name=".ChatsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MessageActivity"
             android:exported="false" />
         <activity
             android:name=".ProfilCurrentUserActivity"

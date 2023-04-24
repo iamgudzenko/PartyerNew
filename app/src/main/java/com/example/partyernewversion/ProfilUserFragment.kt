@@ -45,6 +45,8 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView, IGetUserCurrentVi
             if(userCurr?.phoneNumber == "+79779669296") {
                 val testData = TestData()
                 testData.uploadDataToDB()
+//                testData.writeToDbTestChat()
+//                testData.writeToDbTestUser()
             } else {
                 binding.forDeveloper.text = "вы не алина, а лох"
             }
@@ -63,7 +65,7 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView, IGetUserCurrentVi
     }
 
     override fun cangeLoginSuccess(message: String) {
-        Toast.makeText((activity as ProfilCurrentUserActivity?)!! ,message,Toast.LENGTH_SHORT).show();
+        Toast.makeText((activity as ProfilCurrentUserActivity?)!! ,message,Toast.LENGTH_SHORT).show()
     }
 
     override fun getCurrentUserSuccess(user: Users?) {
@@ -74,5 +76,9 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView, IGetUserCurrentVi
 
     override fun getCurrentUserError(messages: String) {
         Toast.makeText(getActivity(),messages,Toast.LENGTH_SHORT).show();
+    }
+
+    override fun isSignedIn(isSignedIn: Boolean) {
+        TODO("Not yet implemented")
     }
 }

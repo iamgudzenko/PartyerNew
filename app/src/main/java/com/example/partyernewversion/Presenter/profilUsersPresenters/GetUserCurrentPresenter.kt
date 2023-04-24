@@ -35,4 +35,14 @@ class GetUserCurrentPresenter(val getUserCurrentView: IGetUserCurrentView):
         })
         return user
     }
+
+    override fun isSignedIn() {
+        val user = mAuth.currentUser
+        Log.w("USER", user.toString())
+        if (user != null) {
+            getUserCurrentView.isSignedIn(true)
+        } else {
+            getUserCurrentView.isSignedIn(false)
+        }
+    }
 }

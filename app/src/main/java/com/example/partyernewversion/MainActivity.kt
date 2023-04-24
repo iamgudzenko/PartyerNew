@@ -5,12 +5,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +25,7 @@ import com.example.partyernewversion.Presenter.placeMarkPresenters.ISearchResult
 import com.example.partyernewversion.Presenter.placeMarkPresenters.SearchResultPlaseMarkPresenter
 import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.PhoneNumberAuthPresenter
 import com.example.partyernewversion.View.IGetPlaceMarkView
 import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.View.ISearchResultPlaseMarkView
@@ -43,8 +46,6 @@ import com.yandex.mapkit.user_location.UserLocationObjectListener
 import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.*
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @OptIn(DelicateCoroutinesApi::class)
 class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView,
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private val requestPermissionLocation = 1
     private val mapApiKey = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
     var userCurrent: Users? = null
+    var isSignedInUser = false
     private var mapView: MapView? = null
     private var mapObjects: MapObjectCollection? = null
     private lateinit var userLocationLayer: UserLocationLayer
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private lateinit var userLocationButton:ImageButton
     private lateinit var buttonAddPlaceMark:ImageButton
     private lateinit var buttonProfileUser:ImageButton
+    private lateinit var buttonMessages:ImageButton
     private lateinit var editSearch:EditText
 
     private var latitudeTapPoint:Double = 0.0
@@ -93,12 +96,14 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         mapView!!.map.move(CameraPosition(Point(59.935446, 30.317179), 12f, 0f, 0f))
         getUserCurrentPresenter = GetUserCurrentPresenter(this)
         getUserCurrentPresenter.getUserCurrenr()
+        getUserCurrentPresenter.isSignedIn()
         getPlaceMarkPresenter = GetPlaceMarkPresenter(this)
         getSearchResultPlaceMarkPresenter = SearchResultPlaseMarkPresenter(this)
 
         userLocationButton = findViewById(R.id.myLocation)
         buttonAddPlaceMark = findViewById(R.id.buttonAddPlaceMark)
         buttonProfileUser = findViewById(R.id.buttonProfileUser)
+        buttonMessages = findViewById(R.id.buttonMessages)
         editSearch = findViewById(R.id.editSearch)
         val deleteHashtagEdit = findViewById<ImageButton>(R.id.deletHashtag)
         val searchButton= findViewById<ImageButton>(R.id.search)
@@ -106,16 +111,8 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         checkPermission()
         userInterface()
 
-//        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(java.lang.Runnable {
-//            // your code here
-//            mapObjects?.clear()
-//            idPlaceMarkSort.clear()
-//            getPlaceMarkPresenter.getAllPlaceMarks()
-//        }, 0, 5, TimeUnit.SECONDS)
-
         GlobalScope.launch(Dispatchers.IO) {
             getPlaceMarkPresenter.getAllPlaceMarks()
-            getPlaceMarkPresenter.updatePlaceMark()
         }
         adapterHashtagListAdapter = HashtagListAdapter(object: HashtagsActionListener{
             override fun goToHashtagMark(hashtag: String?) {
@@ -146,18 +143,43 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             )
         }
         buttonAddPlaceMark.setOnClickListener {
-            bottomSheetCreate(false)
+            if(!isSignedInUser) {
+                val text = "Авторизуйтесь для добавления мероприятия"
+                Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
+                startActivity(intent)
+            } else {
+                bottomSheetCreate(false)
+            }
+
         }
         buttonProfileUser.setOnClickListener {
             val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
             startActivity(intent)
         }
-        searchButton.setOnClickListener {
-            mapObjects?.clear()
-            idPlaceMarkSort.clear()
-            if (editSearch.text.isNotEmpty()) {
-                getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(editSearch.text.toString())
+        buttonMessages.setOnClickListener {
+            if(!isSignedInUser) {
+                val text = "Авторизуйтесь для общения"
+                Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
+                startActivity(intent)
+            } else {
+                val intent = Intent(this@MainActivity, ChatsActivity::class.java)
+                startActivity(intent)
             }
+        }
+        searchButton.setOnClickListener {
+            if(!isSignedInUser) {
+                val text = "Авторизуйтесь для общения"
+                Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+            } else {
+                mapObjects?.clear()
+                idPlaceMarkSort.clear()
+                if (editSearch.text.isNotEmpty()) {
+                    getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(editSearch.text.toString())
+                }
+            }
+
         }
         deleteHashtagEdit.setOnClickListener {
             editSearch.setText("")
@@ -169,6 +191,22 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         }
 
     }
+
+    override fun onPause() {
+        Log.w("pause", isSignedInUser.toString())
+        super.onPause()
+    }
+    override fun onResume() = runBlocking  {
+        mapObjects?.clear()
+        val job = GlobalScope.launch { // запуск новой сопрограммы с сохранением ссылки на нее в Job
+            getUserCurrentPresenter.isSignedIn()
+        }
+        job.join()
+        Log.w("resume", isSignedInUser.toString())
+        getPlaceMarkPresenter.getAllPlaceMarks()
+        super.onResume()
+    }
+
 
     private fun hashtagShowInMap(hashtag:String) {
         getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(hashtag)
@@ -337,11 +375,18 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         }
     }
     override fun onMapTap(p0: Map, p1: Point) {
-        Log.d("MAP_TAG", "point: " + p1.latitude + ", " + p1.longitude)
+        getUserCurrentPresenter.getUserCurrenr()
+        if(!isSignedInUser) {
+            val text = "Авторизуйтесь для добавления мероприятия"
+            Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+            val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
+            startActivity(intent)
+        } else {
+            latitudeTapPoint = p1.latitude
+            longitudeTapPoint = p1.longitude
+            bottomSheetCreate(true)
+        }
 
-        latitudeTapPoint = p1.latitude
-        longitudeTapPoint = p1.longitude
-        bottomSheetCreate(true)
     }
 
     override fun onMapLongTap(p0: Map, p1: Point) {
@@ -349,20 +394,28 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     }
 
     override fun showPlaceMark(mark: PlaceMark?) {
+
         val pointMark = Point(mark?.latitude!!.toDouble(), mark.longitude!!.toDouble())
         var viewPlaceMark: PlacemarkMapObject = mapObjects!!.addPlacemark(
             pointMark, ImageProvider.fromResource(
                 this, R.drawable.empty_placemark
             )
         )
-        if(mark.userOwner?.phoneNumber == userCurrent?.phoneNumber) {
+        if(isSignedInUser == true){
+            if(mark.userOwner?.phoneNumber == userCurrent?.phoneNumber) {
+                viewPlaceMark = mapObjects!!.addPlacemark(
+                    pointMark, ImageProvider.fromResource(
+                        this, R.drawable.star_placemark
+                    )
+                )
+            }
+        } else {
             viewPlaceMark = mapObjects!!.addPlacemark(
                 pointMark, ImageProvider.fromResource(
-                    this, R.drawable.star_placemark
+                    this, R.drawable.empty_placemark
                 )
             )
         }
-
         viewPlaceMark.userData = mark.id
         mapObjectHashMap[mark.id.toString()] = viewPlaceMark
         viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
@@ -387,15 +440,39 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     }
 
     override fun showInfoPlaceMark(mark: PlaceMark?) {
+        if(!isSignedInUser) {
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.ifIsSignInFalseText)?.text = "Авторизуйтесь, что бы увидеть больше информации"
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.ifIsSignInFalseText)?.visibility = View.VISIBLE
+            bottomSheetDialogInfoPlace?.findViewById<ConstraintLayout>(R.id.layoutBottomSheet)?.visibility = View.GONE
+        } else {
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.ifIsSignInFalseText)?.visibility = View.GONE
+            bottomSheetDialogInfoPlace?.findViewById<ConstraintLayout>(R.id.layoutBottomSheet)?.visibility = View.VISIBLE
 
-        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textNamePlacemark)?.text = mark?.name
-        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textDescriptionPlacemark)?.text = mark?.description
-        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeEvent)?.text = mark?.timeEvent.toString()
-        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeRemove)?.text = mark?.timeRemoveEvent.toString()
-        bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.loginUserOnwer)?.text = "@${mark?.userOwner?.userLogin}"
-        val list = mark?.hashtagsList?.toMutableList()
-        list?.remove("")
-        createViewHashtags(list.orEmpty())
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textNamePlacemark)?.text = mark?.name
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.textDescriptionPlacemark)?.text = mark?.description
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeEvent)?.text = mark?.timeEvent.toString()
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.timeRemove)?.text = mark?.timeRemoveEvent.toString()
+            bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.loginUserOnwer)?.text = "@${mark?.userOwner?.userLogin}"
+            val list = mark?.hashtagsList?.toMutableList()
+            list?.remove("")
+            createViewHashtags(list.orEmpty())
+            val buttonLoginUserOnwer = bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.loginUserOnwer)
+            getUserCurrentPresenter.getUserCurrenr()
+            buttonLoginUserOnwer?.setOnClickListener {
+                if(!isSignedInUser) {
+                    val text = "Авторизуйтесь для начала общения"
+                    Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@MainActivity, ProfilCurrentUserActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(this@MainActivity, MessageActivity::class.java)
+                    intent.putExtra("phoneUserChatWith", mark?.userOwner?.phoneNumber)
+                    intent.putExtra("loginUserChatWith", mark?.userOwner?.userLogin)
+                    intent.putExtra("loginUserCurrent", userCurrent?.userLogin)
+                    startActivity(intent)
+                }
+            }
+        }
     }
     private fun createViewHashtags(listHashtags:List<String?>) {
 
@@ -438,6 +515,10 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun getCurrentUserError(messages: String) {
 
+    }
+
+    override fun isSignedIn(isSignedIn: Boolean) {
+        isSignedInUser = isSignedIn
     }
 
 }

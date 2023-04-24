@@ -4,5 +4,6 @@ import com.example.partyernewversion.Model.Users
 
 interface IGetUserCurrentPresenter {
     fun getUserCurrenr():Users?
+    fun isSignedIn()
 
 }

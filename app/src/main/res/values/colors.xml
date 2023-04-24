@@ -19,4 +19,8 @@
     <color name="colorAccent">#ff808b</color>
     <color name="white2">#FDE0CB</color>
 
+    <color name="mess">#D6F1FF</color>
+    <color name="mess2">#E8DAF8</color>
+    <color name="textMessageColor">#424242</color>
+
 </resources>

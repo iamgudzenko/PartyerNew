@@ -120,4 +120,8 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
     override fun getCurrentUserError(messages: String) {
 
     }
+
+    override fun isSignedIn(isSignedIn: Boolean) {
+        TODO("Not yet implemented")
+    }
 }
