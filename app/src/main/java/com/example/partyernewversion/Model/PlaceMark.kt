@@ -14,7 +14,7 @@ data class PlaceMark(
     var timeEvent: Any? = null,
     var timeRemoveEvent:Any? = null,
     val hashtagsList: List<String?> = emptyList(),
-    val listUsersOfJoin:List<Users?> = emptyList()
+    val listUsersOfJoin: List<String> = listOf("hi"),
 ) {
 
 

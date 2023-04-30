@@ -105,7 +105,7 @@
         android:id="@+id/layoutContactUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/buttonIGo"
+        app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/timeEvent">
@@ -137,19 +137,38 @@
         android:layout_height="wrap_content"
         android:id="@+id/recyclerViewHashtagsList"
         app:reverseLayout="true"
-        app:layout_constraintBottom_toTopOf="@+id/buttonIGo"
+
+        app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layoutContactUser"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
-        android:id="@+id/buttonIGo"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Я пойду"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recyclerViewHashtagsList">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/recyclerViewHashtagsList"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    </Button>
+        <Button
+            android:id="@+id/buttonIGo"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Я пойду"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        </Button>
+
+        <Button
+            android:id="@+id/buttonNotIGo"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        </Button>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

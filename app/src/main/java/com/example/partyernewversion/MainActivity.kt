@@ -1,11 +1,11 @@
 package com.example.partyernewversion
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,16 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.partyernewversion.Model.PlaceMark
 import com.example.partyernewversion.Model.Users
-import com.example.partyernewversion.Presenter.placeMarkPresenters.GetPlaceMarkPresenter
-import com.example.partyernewversion.Presenter.placeMarkPresenters.IGetPlaceMarkPresenter
-import com.example.partyernewversion.Presenter.placeMarkPresenters.ISearchResultPlaseMarkPresenter
-import com.example.partyernewversion.Presenter.placeMarkPresenters.SearchResultPlaseMarkPresenter
+import com.example.partyernewversion.Presenter.placeMarkPresenters.*
 import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
-import com.example.partyernewversion.Presenter.profilUsersPresenters.PhoneNumberAuthPresenter
 import com.example.partyernewversion.View.IGetPlaceMarkView
 import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.View.ISearchResultPlaseMarkView
+import com.example.partyernewversion.View.UserOfJoinPlaceMarkView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.Animation.Type.SMOOTH
@@ -49,17 +46,19 @@ import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
 class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView,
-    IGetUserCurrentView {
+    IGetUserCurrentView, UserOfJoinPlaceMarkView {
 
     private val requestPermissionLocation = 1
     private val mapApiKey = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
-    var userCurrent: Users? = null
-    var isSignedInUser = false
+    private var userCurrent: Users? = null
+    private var isSignedInUser = false
     private var mapView: MapView? = null
     private var mapObjects: MapObjectCollection? = null
     private lateinit var userLocationLayer: UserLocationLayer
+    private var listOfJoinUserPlaceMark:MutableList<String>?  = null
     private lateinit var getPlaceMarkPresenter: IGetPlaceMarkPresenter
-    lateinit var getUserCurrentPresenter: IGetUserCurrentPresenter
+    private lateinit var userOfJoinPlaceMark: IUserOfJoinPlaceMarkPresenter
+    private lateinit var getUserCurrentPresenter: IGetUserCurrentPresenter
     private lateinit var getSearchResultPlaceMarkPresenter: ISearchResultPlaseMarkPresenter
     private var routeStartLocation = Point(0.0, 0.0)
     private var pointZoom: Point? = null
@@ -72,11 +71,13 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private lateinit var buttonAddPlaceMark:ImageButton
     private lateinit var buttonProfileUser:ImageButton
     private lateinit var buttonMessages:ImageButton
+    private var buttonIGo:Button? = null
+    private var buttonNotIGo:Button? = null
     private lateinit var editSearch:EditText
 
     private var latitudeTapPoint:Double = 0.0
     private var longitudeTapPoint:Double = 0.0
-    private var mapObjectHashMap = HashMap<String, MapObject>()
+    private var mapObjectHashMap = HashMap<String, PlacemarkMapObject>()
     private var idPlaceMarkSort = HashMap<PlaceMark?, Double>()
     private lateinit var adapterHashtagListAdapter: HashtagListAdapter
     private var bottomSheetDialogInfoPlace: BottomSheetDialog? = null
@@ -96,8 +97,10 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         mapView!!.map.move(CameraPosition(Point(59.935446, 30.317179), 12f, 0f, 0f))
         getUserCurrentPresenter = GetUserCurrentPresenter(this)
         getUserCurrentPresenter.getUserCurrenr()
+        userOfJoinPlaceMark = UserOfJoinPlaceMarkPresenter(this)
         getUserCurrentPresenter.isSignedIn()
         getPlaceMarkPresenter = GetPlaceMarkPresenter(this)
+
         getSearchResultPlaceMarkPresenter = SearchResultPlaseMarkPresenter(this)
 
         userLocationButton = findViewById(R.id.myLocation)
@@ -115,6 +118,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             getPlaceMarkPresenter.getAllPlaceMarks()
         }
         adapterHashtagListAdapter = HashtagListAdapter(object: HashtagsActionListener{
+            @SuppressLint("SetTextI18n")
             override fun goToHashtagMark(hashtag: String?) {
                 hashtagShowInMap(hashtag.toString())
                 mapObjects?.clear()
@@ -198,7 +202,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     }
     override fun onResume() = runBlocking  {
         mapObjects?.clear()
-        val job = GlobalScope.launch { // запуск новой сопрограммы с сохранением ссылки на нее в Job
+        val job = GlobalScope.launch {
             getUserCurrentPresenter.isSignedIn()
         }
         job.join()
@@ -206,8 +210,6 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         getPlaceMarkPresenter.getAllPlaceMarks()
         super.onResume()
     }
-
-
     private fun hashtagShowInMap(hashtag:String) {
         getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(hashtag)
     }
@@ -401,11 +403,18 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
                 this, R.drawable.empty_placemark
             )
         )
-        if(isSignedInUser == true){
+        if(isSignedInUser){
             if(mark.userOwner?.phoneNumber == userCurrent?.phoneNumber) {
                 viewPlaceMark = mapObjects!!.addPlacemark(
                     pointMark, ImageProvider.fromResource(
                         this, R.drawable.star_placemark
+                    )
+                )
+            }
+            if(listOfJoinUserPlaceMark?.contains(mark.id.toString()) == true) {
+                viewPlaceMark = mapObjects!!.addPlacemark(
+                    pointMark, ImageProvider.fromResource(
+                        this, R.drawable.like_placemark
                     )
                 )
             }
@@ -439,6 +448,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     }
 
+    @SuppressLint("SetTextI18n", "CutPasteId")
     override fun showInfoPlaceMark(mark: PlaceMark?) {
         if(!isSignedInUser) {
             bottomSheetDialogInfoPlace?.findViewById<TextView>(R.id.ifIsSignInFalseText)?.text = "Авторизуйтесь, что бы увидеть больше информации"
@@ -472,6 +482,26 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
                     startActivity(intent)
                 }
             }
+            buttonIGo = bottomSheetDialogInfoPlace?.findViewById(R.id.buttonIGo)
+            buttonNotIGo = bottomSheetDialogInfoPlace?.findViewById(R.id.buttonNotIGo)
+            Log.w("ID", listOfJoinUserPlaceMark.toString())
+            if(userCurrent?.listPlaceMarkOfJoin?.contains(mark?.id.toString()) == true) {
+                buttonIGo?.visibility = View.GONE
+                buttonNotIGo?.visibility = View.VISIBLE
+                val countUserJoin = mark?.listUsersOfJoin?.size?.minus(1)
+                buttonNotIGo?.text = "пойдет $countUserJoin человек"
+            }
+
+            buttonIGo?.setOnClickListener {
+                userOfJoinPlaceMark.userOfJoin(userCurrent?.phoneNumber.toString(), mark?.id.toString())
+                Log.w("JOIN", mark?.listUsersOfJoin.toString())
+
+            }
+            buttonNotIGo?.setOnClickListener {
+                userOfJoinPlaceMark.userDeleteOfJoin(userCurrent?.phoneNumber.toString(), mark?.id.toString())
+
+            }
+
         }
     }
     private fun createViewHashtags(listHashtags:List<String?>) {
@@ -506,11 +536,13 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         )
         viewPlaceMark.userData = mark.id
         mapObjectHashMap[mark.id.toString()] = viewPlaceMark
+
         viewPlaceMark.addTapListener(placeMarkMapObjectTapListener)
     }
 
     override fun getCurrentUserSuccess(user: Users?) {
         userCurrent = user
+        listOfJoinUserPlaceMark = userCurrent?.listPlaceMarkOfJoin?.toMutableList()
     }
 
     override fun getCurrentUserError(messages: String) {
@@ -519,6 +551,37 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun isSignedIn(isSignedIn: Boolean) {
         isSignedInUser = isSignedIn
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun ofJoinSuccessListPlaceMark(countUserJoin: Int) {
+        buttonIGo?.visibility = View.GONE
+        buttonNotIGo?.visibility = View.VISIBLE
+        buttonNotIGo?.text = "пойдет ${countUserJoin-1} человек"
+    }
+
+    override fun ofJoinErrorListPlaceMark(message: String) {
+        Log.w("COUNTList", message)
+    }
+
+    override fun ofJoinSuccessListUser(listOfJoinUser: MutableList<String>) {
+        listOfJoinUserPlaceMark = listOfJoinUser
+
+        Log.w("COUNTList", listOfJoinUser.toString())
+    }
+
+    override fun ofJoinErrorListUser(message: String) {
+        Log.w("COUNTList", message)
+    }
+
+    override fun deleteJoinListSuccessPlaceMark(countUserJoin: Int) {
+        buttonNotIGo?.visibility = View.GONE
+        buttonIGo?.visibility = View.VISIBLE
+
+    }
+
+    override fun deleteJoinSuccessListUser(listOfJoinUser: MutableList<String>) {
+        listOfJoinUserPlaceMark = listOfJoinUser
     }
 
 }

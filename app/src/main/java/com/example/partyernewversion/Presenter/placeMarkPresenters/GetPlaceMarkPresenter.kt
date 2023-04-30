@@ -1,5 +1,6 @@
 package com.example.partyernewversion.Presenter.placeMarkPresenters
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.partyernewversion.Model.PlaceMark
 import com.example.partyernewversion.View.IGetPlaceMarkView
@@ -47,6 +48,7 @@ class GetPlaceMarkPresenter(val getPlaceMarkView: IGetPlaceMarkView) : IGetPlace
         }
         return lTime
     }
+    @SuppressLint("SimpleDateFormat")
     private fun timestampToDateString(timeLong:Long): String {
         val data = Date(timeLong * 1000)
         val parser = SimpleDateFormat("HH:mm")
@@ -89,7 +91,7 @@ class GetPlaceMarkPresenter(val getPlaceMarkView: IGetPlaceMarkView) : IGetPlace
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 Log.w("REMPresent", "REmove in GetPlaceMarkPresrnter")
-                getPlaceMarkView.removePlaceMarkOnMap(snapshot?.key.toString())
+                getPlaceMarkView.removePlaceMarkOnMap(snapshot.key.toString())
             }
             override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
                 Log.w("EVENT", "onChildMoved")

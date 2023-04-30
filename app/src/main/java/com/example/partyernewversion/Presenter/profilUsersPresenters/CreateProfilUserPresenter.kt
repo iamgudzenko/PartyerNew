@@ -12,7 +12,7 @@ class CreateProfilUserPresenter(val createProfilUsserView: ICreateProfilUsserVie
 
     override fun writeProfilUserToDB(phoneNumber: String) {
         val user = Users("+7$phoneNumber", mAuth.currentUser?.uid)
-        var ref = database.reference.child("Users")
+        val ref = database.reference.child("Users")
         ref.push().setValue(user)
         createProfilUsserView.createProfilUserSuccess("Успешно зарегистрировались")
     }

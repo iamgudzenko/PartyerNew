@@ -1,6 +1,9 @@
 package com.example.partyernewversion.Presenter.placeMarkPresenters
 
+import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.partyernewversion.Model.PlaceMark
 import com.example.partyernewversion.Model.Users
 import com.example.partyernewversion.View.ICreatePlaceMarkView
@@ -15,7 +18,9 @@ class CreatePlaceMarkPresenter(private val placeMarkView: ICreatePlaceMarkView) 
     private var ref = database.reference
     private val HOUR:Long = 3600*1000
 
-    override fun createPlaceMark(name:String, description:String, userCurrent: Users?,latitude: Double, longitude: Double, timeEvent:String, timeRemove:String, hashtagEvent:String) {
+    @SuppressLint("SimpleDateFormat")
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun createPlaceMark(name:String, description:String, userCurrent: Users?, latitude: Double, longitude: Double, timeEvent:String, timeRemove:String, hashtagEvent:String) {
         val sdf = SimpleDateFormat("yyyy-MM-dd")
         val currentDate = sdf.format(Date())
         val text = currentDate + "T" + timeEvent
