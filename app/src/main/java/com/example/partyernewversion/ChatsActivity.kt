@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.partyernewversion.Model.Chats
@@ -32,6 +34,7 @@ class ChatsActivity : AppCompatActivity(), ChatsView, IGetUserCurrentView {
         setContentView(binding.root)
         chatsPresenter = ChatsPresenter(this)
 
+
         getUserCurrentPresenter = GetUserCurrentPresenter(this)
         getUserCurrentPresenter.getUserCurrenr()
 
@@ -43,7 +46,6 @@ class ChatsActivity : AppCompatActivity(), ChatsView, IGetUserCurrentView {
                 intent.putExtra("loginUserCurrent", userProfilCurrent?.userLogin.toString())
                 startActivity(intent)
             }
-
         })
     }
 
@@ -60,6 +62,9 @@ class ChatsActivity : AppCompatActivity(), ChatsView, IGetUserCurrentView {
         binding.recyclerViewChats.layoutManager = layoutManager
         binding.recyclerViewChats.adapter = adapter
         adapter.notifyDataSetChanged()
+        if(chatsMap.isNotEmpty()) {
+            binding.textInfoChats.visibility = View.GONE
+        }
     }
 
     override fun onResume() {

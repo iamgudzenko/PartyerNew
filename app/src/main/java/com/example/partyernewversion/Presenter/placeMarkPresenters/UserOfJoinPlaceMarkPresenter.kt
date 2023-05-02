@@ -1,10 +1,15 @@
 package com.example.partyernewversion.Presenter.placeMarkPresenters
 
 import android.util.Log
+import com.example.partyernewversion.Model.Messages
 import com.example.partyernewversion.Model.PlaceMark
 import com.example.partyernewversion.Model.Users
+import com.example.partyernewversion.Presenter.messagesPresenter.IMessagesPresenter
+import com.example.partyernewversion.Presenter.messagesPresenter.MessagesPresenter
+import com.example.partyernewversion.View.IMessageView
 import com.example.partyernewversion.View.UserOfJoinPlaceMarkView
 import com.google.firebase.database.*
+import com.google.firebase.firestore.auth.User
 import java.util.*
 
 class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMarkView): IUserOfJoinPlaceMarkPresenter {
@@ -12,13 +17,15 @@ class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMa
     private var ref = database.reference
 
     override fun userOfJoin(phoneNumberUser: String, idPlaceMark: String) {
+        var user:Users? = null
+        var mark:PlaceMark? = null
         ref = FirebaseDatabase.getInstance().reference
         ref.child("PlaceMark").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (ds in snapshot.children) {
                     if(ds.key.equals(idPlaceMark)) {
-                        val mark: PlaceMark? = ds.getValue(PlaceMark::class.java)
+                        mark = ds.getValue(PlaceMark::class.java)
                         val l = mark?.listUsersOfJoin?.toMutableList()
                         addListUserPlaceMark(ds, l, phoneNumberUser)
                     }
@@ -36,9 +43,10 @@ class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMa
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (ds in snapshot.children) {
-                    val user: Users? = ds.getValue(Users::class.java)
+                    user = ds.getValue(Users::class.java)
                     Log.w("JINUser", user?.phoneNumber.toString())
                     val l = user?.listPlaceMarkOfJoin?.toMutableList()
+
                     addListPlaceMarkInuser(ds, l, idPlaceMark)
                 }
             }
@@ -51,13 +59,15 @@ class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMa
     }
 
     override fun userDeleteOfJoin(phoneNumberUser: String, idPlaceMark: String) {
+        var user:Users? = null
+        var mark:PlaceMark? = null
         ref = FirebaseDatabase.getInstance().reference
         ref.child("PlaceMark").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (ds in snapshot.children) {
                     if(ds.key.equals(idPlaceMark)) {
-                        val mark: PlaceMark? = ds.getValue(PlaceMark::class.java)
+                        mark = ds.getValue(PlaceMark::class.java)
                         val l = mark?.listUsersOfJoin?.toMutableList()
                         deleteListUserPlaceMark(ds, l, phoneNumberUser)
                     }
@@ -75,7 +85,7 @@ class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMa
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (ds in snapshot.children) {
-                    val user: Users? = ds.getValue(Users::class.java)
+                    user = ds.getValue(Users::class.java)
                     Log.w("JINUser", user?.phoneNumber.toString())
                     val l = user?.listPlaceMarkOfJoin?.toMutableList()
                     deleteListPlaceMarkInuser(ds, l, idPlaceMark)
@@ -112,4 +122,5 @@ class UserOfJoinPlaceMarkPresenter(private val userOfJoinView: UserOfJoinPlaceMa
         ds.ref.child("listPlaceMarkOfJoin").setValue(l)
         userOfJoinView.deleteJoinSuccessListUser(l!!)
     }
+
 }

@@ -45,8 +45,6 @@ class ProfilUserFragment : Fragment(), IProfilCurrentUserView, IGetUserCurrentVi
             if(userCurr?.phoneNumber == "+79779669296") {
                 val testData = TestData()
                 testData.uploadDataToDB()
-//                testData.writeToDbTestChat()
-//                testData.writeToDbTestUser()
             } else {
                 binding.forDeveloper.text = "вы не алина, а лох"
             }

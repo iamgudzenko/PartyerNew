@@ -36,28 +36,28 @@ class MessagesPresenter(val messageView: IMessageView) : IMessagesPresenter {
     }
 
     override fun sendMessage(
-        loginUserChatWith: String,
-        loginUserOwner: String,
+        phoneUserChatWith: String,
+        phoneUserOwner: String,
         textMessage: String
     ) {
         ref = FirebaseDatabase.getInstance().reference
-        ref.child("Chats").child(loginUserOwner).orderByChild("loginUserChatWith").equalTo(loginUserChatWith).addListenerForSingleValueEvent(object : ValueEventListener {
+        ref.child("Chats").child(phoneUserOwner).orderByChild("loginUserChatWith").equalTo(phoneUserChatWith).addListenerForSingleValueEvent(object : ValueEventListener {
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if(dataSnapshot.childrenCount.toInt() == 0) {
-                    val newChatCurrentUser = Chats(null, loginUserOwner, mutableListOf(Messages(loginUserOwner, textMessage, ServerValue.TIMESTAMP)), 1)
-                    val newChatWithUser = Chats(null, loginUserChatWith, mutableListOf(Messages(loginUserOwner, textMessage, ServerValue.TIMESTAMP)))
+                    val newChatCurrentUser = Chats(null, phoneUserOwner, mutableListOf(Messages(phoneUserOwner, textMessage, ServerValue.TIMESTAMP)), 1)
+                    val newChatWithUser = Chats(null, phoneUserChatWith, mutableListOf(Messages(phoneUserOwner, textMessage, ServerValue.TIMESTAMP)))
 
-                    ref.child("Chats").child(loginUserChatWith).push().setValue(newChatCurrentUser)
-                    ref.child("Chats").child(loginUserOwner).push().setValue(newChatWithUser)
+                    ref.child("Chats").child(phoneUserChatWith).push().setValue(newChatCurrentUser)
+                    ref.child("Chats").child(phoneUserOwner).push().setValue(newChatWithUser)
                 }
                 Log.e("sendNewChats", dataSnapshot.childrenCount.toString())
                 for (ds in dataSnapshot.children) {
                     val chats: Chats? = ds.getValue(Chats::class.java)
-                    val messages = Messages(loginUserOwner, textMessage, ServerValue.TIMESTAMP)
+                    val messages = Messages(phoneUserOwner, textMessage, ServerValue.TIMESTAMP)
                     val c = chats?.listMessages?.size ?: 0
                     var countUnreadMess:Int? = chats?.countUnreadMess
-                    addChatstoDb(loginUserChatWith, loginUserOwner, textMessage)
+                    addChatstoDb(phoneUserChatWith, phoneUserOwner, textMessage)
                     writeChats(messages, c, ds, countUnreadMess)
 
                 }

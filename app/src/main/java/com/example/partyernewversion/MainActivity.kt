@@ -17,15 +17,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.partyernewversion.Model.Messages
 import com.example.partyernewversion.Model.PlaceMark
 import com.example.partyernewversion.Model.Users
+import com.example.partyernewversion.Presenter.messagesPresenter.IMessagesPresenter
+import com.example.partyernewversion.Presenter.messagesPresenter.MessagesPresenter
 import com.example.partyernewversion.Presenter.placeMarkPresenters.*
 import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
-import com.example.partyernewversion.View.IGetPlaceMarkView
-import com.example.partyernewversion.View.IGetUserCurrentView
-import com.example.partyernewversion.View.ISearchResultPlaseMarkView
-import com.example.partyernewversion.View.UserOfJoinPlaceMarkView
+import com.example.partyernewversion.View.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.Animation.Type.SMOOTH
@@ -46,7 +46,7 @@ import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
 class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener, InputListener, IGetPlaceMarkView, ISearchResultPlaseMarkView,
-    IGetUserCurrentView, UserOfJoinPlaceMarkView {
+    IGetUserCurrentView, UserOfJoinPlaceMarkView, IMessageView {
 
     private val requestPermissionLocation = 1
     private val mapApiKey = "c4e25bdd-cf32-46b8-bf87-9c547fa9b989"
@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private lateinit var getPlaceMarkPresenter: IGetPlaceMarkPresenter
     private lateinit var userOfJoinPlaceMark: IUserOfJoinPlaceMarkPresenter
     private lateinit var getUserCurrentPresenter: IGetUserCurrentPresenter
+    lateinit var messagePresenter:IMessagesPresenter
     private lateinit var getSearchResultPlaceMarkPresenter: ISearchResultPlaseMarkPresenter
     private var routeStartLocation = Point(0.0, 0.0)
     private var pointZoom: Point? = null
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         userOfJoinPlaceMark = UserOfJoinPlaceMarkPresenter(this)
         getUserCurrentPresenter.isSignedIn()
         getPlaceMarkPresenter = GetPlaceMarkPresenter(this)
+        messagePresenter = MessagesPresenter(this)
 
         getSearchResultPlaceMarkPresenter = SearchResultPlaseMarkPresenter(this)
 
@@ -299,8 +301,8 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun onObjectAdded(p0: UserLocationView) {
         setAnchor()
-        p0.pin.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
-        p0.arrow.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
+        p0.pin.setIcon(ImageProvider.fromResource(this, R.drawable.icon_loc_new))
+        p0.arrow.setIcon(ImageProvider.fromResource(this, R.drawable.icon_loc_new))
         p0.accuracyCircle.fillColor = Color.BLUE
     }
 
@@ -494,14 +496,17 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
             buttonIGo?.setOnClickListener {
                 userOfJoinPlaceMark.userOfJoin(userCurrent?.phoneNumber.toString(), mark?.id.toString())
-                Log.w("JOIN", mark?.listUsersOfJoin.toString())
-
+                sendMessageJoinUser(userCurrent, mark)
+                val intent = Intent(this@MainActivity, MessageActivity::class.java)
+                intent.putExtra("phoneUserChatWith", mark?.userOwner?.phoneNumber)
+                intent.putExtra("loginUserChatWith", mark?.userOwner?.userLogin)
+                intent.putExtra("loginUserCurrent", userCurrent?.userLogin)
+                startActivity(intent)
             }
             buttonNotIGo?.setOnClickListener {
                 userOfJoinPlaceMark.userDeleteOfJoin(userCurrent?.phoneNumber.toString(), mark?.id.toString())
-
+                userNotJoinPlaceMark(userCurrent, mark)
             }
-
         }
     }
     private fun createViewHashtags(listHashtags:List<String?>) {
@@ -566,8 +571,6 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
     override fun ofJoinSuccessListUser(listOfJoinUser: MutableList<String>) {
         listOfJoinUserPlaceMark = listOfJoinUser
-
-        Log.w("COUNTList", listOfJoinUser.toString())
     }
 
     override fun ofJoinErrorListUser(message: String) {
@@ -584,5 +587,22 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         listOfJoinUserPlaceMark = listOfJoinUser
     }
 
+    override fun loadingMessagesSuccess(listMessage: MutableList<Messages>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun loadingMessagesError(message: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendMessagesError(message: String) {
+        TODO("Not yet implemented")
+    }
+    fun sendMessageJoinUser(user: Users?, mark: PlaceMark?) {
+        messagePresenter.sendMessage(mark?.userOwner?.userLogin.toString(), user?.userLogin.toString(), "Привет! Я приду на твое мероприятие ${mark?.name}!")
+    }
+    fun userNotJoinPlaceMark(user: Users?, mark: PlaceMark?) {
+        messagePresenter.sendMessage(mark?.userOwner?.userLogin.toString(), user?.userLogin.toString(), "Привет! Я передумал идти на ${mark?.name}(")
+    }
 }
 
