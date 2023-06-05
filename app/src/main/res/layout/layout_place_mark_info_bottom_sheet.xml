@@ -158,6 +158,15 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
         </Button>
+        <Button
+            android:id="@+id/buttonUserOnwer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Это ваша метка"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        </Button>
 
         <Button
             android:id="@+id/buttonNotIGo"

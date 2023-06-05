@@ -13,6 +13,9 @@
         <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
             <item name="android:background">@android:color/transparent</item>
         </style>
+    <style name="FloatingActionButton" parent="ThemeOverlay.Material3.FloatingActionButton.Primary">
+        <item name="android:background"> @android:color/white</item>
+    </style>
 
     <style name="ButtonStyle" parent="@android:style/Widget.Button">
 

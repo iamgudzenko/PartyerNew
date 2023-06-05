@@ -12,71 +12,92 @@
         android:layout_height="match_parent">
     </com.yandex.mapkit.mapview.MapView>
 
+
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:id="@+id/layoutSearch"
             android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout3"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_corners"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginHorizontal="15dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/round_corners">
+                app:layout_constraintTop_toTopOf="parent">
 
 
                 <EditText
+                    android:id="@+id/editSearch"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:id="@+id/editSearch"
-                    android:hint="поиск по #хештегу"
                     android:backgroundTint="@android:color/transparent"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:hint="поиск по #хештегу"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/search"
                     app:layout_constraintStart_toStartOf="parent"
-                    >
+                    app:layout_constraintTop_toTopOf="parent">
+
                 </EditText>
+
                 <ImageButton
+                    android:id="@+id/deletHashtag"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:id="@+id/deletHashtag"
-                    android:src="@drawable/delete_hashtag_icon"
                     android:background="@color/white"
+                    android:src="@drawable/delete_hashtag_icon"
                     android:visibility="invisible"
-                    app:layout_constraintStart_toEndOf="@+id/editSearch"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/search"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent">
+                    app:layout_constraintStart_toEndOf="@+id/editSearch"
+                    app:layout_constraintTop_toTopOf="parent">
 
                 </ImageButton>
+
                 <ImageButton
+                    android:id="@+id/search"
                     android:layout_width="50dp"
                     android:layout_height="0dp"
-                    android:id="@+id/search"
-                    android:src="@drawable/search"
                     android:background="@color/white"
-                    app:layout_constraintStart_toEndOf="@+id/deletHashtag"
+                    android:src="@drawable/search"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent">
+                    app:layout_constraintStart_toEndOf="@+id/deletHashtag"
+                    app:layout_constraintTop_toTopOf="parent">
 
                 </ImageButton>
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+            <ImageButton
+                android:id="@+id/spravka"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedbutton"
+                android:src="@drawable/quest"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3">
+
+            </ImageButton>
             <ImageButton
                 android:id="@+id/myLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/roundedbutton"
                 android:layout_marginBottom="100dp"
+                android:backgroundTint="@color/mess"
                 android:layout_marginEnd="10dp"
                 android:src="@drawable/user_home"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -88,6 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/mess"
                 android:layout_marginBottom="60dp"
                 android:background="@drawable/roundedbutton"
                 android:src="@drawable/minus"
@@ -101,6 +123,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/roundedbutton"
                 android:src="@drawable/plus"
+                android:backgroundTint="@color/mess"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="20dp"
                 app:layout_constraintBottom_toTopOf="@+id/minusZoom"
@@ -193,7 +216,7 @@
             android:id="@+id/buttonAddPlaceMark"
             android:backgroundTint="@color/ha"
             app:layout_anchor="@id/bottomAppBar"
-            android:src="@drawable/plus"/>
+            android:src="@drawable/plus" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

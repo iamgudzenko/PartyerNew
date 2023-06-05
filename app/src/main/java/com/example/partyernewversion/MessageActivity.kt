@@ -72,12 +72,12 @@ class MessageActivity : AppCompatActivity(), IGetUserCurrentView, IMessageView {
     }
 
     override fun loadingMessagesError(message: String) {
-        Toast.makeText(this@MessageActivity, "Error: $message", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this@MessageActivity, "Error: $message", Toast.LENGTH_SHORT).show()
 
     }
 
     override fun sendMessagesError(message: String) {
-        Toast.makeText(this@MessageActivity, "Error: $message", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this@MessageActivity, "Error: $message", Toast.LENGTH_SHORT).show()
 
     }
     override fun onBackPressed() {

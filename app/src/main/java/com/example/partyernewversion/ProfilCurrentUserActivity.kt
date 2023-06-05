@@ -3,6 +3,7 @@ package com.example.partyernewversion
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import com.example.partyernewversion.Presenter.TestData
 import com.example.partyernewversion.databinding.ActivityProfilUserBinding
 
 class ProfilCurrentUserActivity : AppCompatActivity() {
@@ -12,6 +13,8 @@ class ProfilCurrentUserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfilUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
+//        val testData = TestData()
+//        testData.uploadDataToDB()
         openFragment(LogInFragment())
 
     }

@@ -23,7 +23,6 @@ class GetUserCurrentPresenter(val getUserCurrentView: IGetUserCurrentView):
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (ds in snapshot.children) {
                     user = ds.getValue(Users::class.java)
-
                     getUserCurrentView.getCurrentUserSuccess(user)
                     break
                 }

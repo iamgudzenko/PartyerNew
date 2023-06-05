@@ -5,15 +5,17 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.NumberPicker
 import androidx.appcompat.app.AppCompatActivity
 import com.example.partyernewversion.Model.Users
 import com.example.partyernewversion.Presenter.placeMarkPresenters.CreatePlaceMarkPresenter
-import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.placeMarkPresenters.ICreatePlaceMarkPresenter
+import com.example.partyernewversion.Presenter.profilUsersPresenters.GetUserCurrentPresenter
 import com.example.partyernewversion.Presenter.profilUsersPresenters.IGetUserCurrentPresenter
 import com.example.partyernewversion.View.ICreatePlaceMarkView
 import com.example.partyernewversion.View.IGetUserCurrentView
 import com.example.partyernewversion.databinding.ActivityAddPlaceMarkBinding
+
 
 class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUserCurrentView {
     lateinit var binding: ActivityAddPlaceMarkBinding
@@ -22,16 +24,16 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
     var userCurrent: Users? = null
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
-    private var spinerrText = arrayOf("Выбрать", "Моё местоположение", "Выбрать точку на карте")
+    private var spinerrText = arrayOf("Выбрать", "Моё местоположение")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddPlaceMarkBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         createPlaceMarkPresenter = CreatePlaceMarkPresenter(this)
         getUserCurrentPresenter = GetUserCurrentPresenter(this)
         getUserCurrentPresenter.getUserCurrenr()
-
         val arguments = intent.extras
 
         if (arguments!!.getBoolean("isMapTapPoint")) {
@@ -61,11 +63,12 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
                     if (item == spinerrText[1]) {
                         latitude = arguments.getDouble("userLatitude")
                         longitude = arguments.getDouble("userLongitude")
-                    } else if (item == spinerrText[2]) {
-                    //Переход на выбор точки
-//                        val intent = Intent(this@AddNewPlaceMark, PointSelectionMap::class.java)
-//                        startActivity(intent)
                     }
+//                    else if (item == spinerrText[2]) {
+//                    //Переход на выбор точки
+////                        val intent = Intent(this@AddNewPlaceMark, PointSelectionMap::class.java)
+////                        startActivity(intent)
+//                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -108,8 +111,8 @@ class AddPlaceMarkActivity : AppCompatActivity(), ICreatePlaceMarkView, IGetUser
     }
 
     override fun createPlaceMarkSuccess(message: String) {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+//        val intent = Intent(this, MainActivity::class.java)
+//        startActivity(intent)
         finish()
     }
 

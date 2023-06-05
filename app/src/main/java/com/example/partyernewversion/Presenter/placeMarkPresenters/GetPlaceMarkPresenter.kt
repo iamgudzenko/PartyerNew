@@ -20,7 +20,6 @@ class GetPlaceMarkPresenter(val getPlaceMarkView: IGetPlaceMarkView) : IGetPlace
                     val mark: PlaceMark? = ds.getValue(PlaceMark::class.java)
                     mark?.id = ds.key
                     val timeRemoveLong = timestampToLong(mark?.timeRemoveEvent)
-
                     val dateTimeCurrent = Date()
                     val dateTimeRemove = Date(timeRemoveLong!!.toLong() * 1000)
                     mark?.timeEvent = timestampToDateString(timestampToLong(mark?.timeEvent)!!)

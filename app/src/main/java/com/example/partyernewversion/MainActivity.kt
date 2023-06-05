@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.partyernewversion.Model.Messages
@@ -82,6 +83,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     private var idPlaceMarkSort = HashMap<PlaceMark?, Double>()
     private lateinit var adapterHashtagListAdapter: HashtagListAdapter
     private var bottomSheetDialogInfoPlace: BottomSheetDialog? = null
+    var bottomSheetDialog:BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         MapKitFactory.setApiKey(mapApiKey)
@@ -132,6 +134,12 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         val minusZoomButton = findViewById<ImageButton>(R.id.minusZoom)
         val plusZoomButton = findViewById<ImageButton>(R.id.plusZoom)
+        val infoButton = findViewById<ImageButton>(R.id.spravka)
+
+        infoButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, InfoActivity::class.java)
+            startActivity(intent)
+        }
 
         minusZoomButton.setOnClickListener {
             mapView!!.map.move(
@@ -196,13 +204,15 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             }
         }
 
+
     }
+
 
     override fun onPause() {
         Log.w("pause", isSignedInUser.toString())
         super.onPause()
     }
-    override fun onResume() = runBlocking  {
+    override fun onResume(): Unit = runBlocking  {
         mapObjects?.clear()
         val job = GlobalScope.launch {
             getUserCurrentPresenter.isSignedIn()
@@ -211,6 +221,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         Log.w("resume", isSignedInUser.toString())
         getPlaceMarkPresenter.getAllPlaceMarks()
         super.onResume()
+        bottomSheetDialog?.hide()
     }
     private fun hashtagShowInMap(hashtag:String) {
         getSearchResultPlaceMarkPresenter.getResultSearchPlaseMark(hashtag)
@@ -345,19 +356,19 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     }
 
     private fun bottomSheetCreate(isMapTapPoint: Boolean){
-        val bottomSheetDialog = BottomSheetDialog(
+        bottomSheetDialog = BottomSheetDialog(
             this, R.style.BottomSheetDialogTheme
         )
         val bottomSheetView = LayoutInflater.from(applicationContext).inflate(
             R.layout.layout_bottom_sheet,
             findViewById<LinearLayout>(R.id.bottomSheetContainer)
         )
-        bottomSheetDialog.setContentView(bottomSheetView)
-        bottomSheetDialog.show()
+        bottomSheetDialog?.setContentView(bottomSheetView)
+        bottomSheetDialog?.show()
 
-        val buttonYes = bottomSheetDialog.findViewById<Button>(R.id.buttonYes)
+        val buttonYes = bottomSheetDialog?.findViewById<Button>(R.id.buttonYes)
         val buttonCancelAddPlaceMark =
-            bottomSheetDialog.findViewById<Button>(R.id.buttonСancelAddPlaceMark)
+            bottomSheetDialog?.findViewById<Button>(R.id.buttonСancelAddPlaceMark)
 
         buttonYes?.setOnClickListener {
             val intent = Intent(this@MainActivity, AddPlaceMarkActivity::class.java)
@@ -375,7 +386,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         }
         buttonCancelAddPlaceMark?.setOnClickListener {
-            bottomSheetDialog.hide()
+            bottomSheetDialog?.hide()
         }
     }
     override fun onMapTap(p0: Map, p1: Point) {
@@ -486,6 +497,12 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             }
             buttonIGo = bottomSheetDialogInfoPlace?.findViewById(R.id.buttonIGo)
             buttonNotIGo = bottomSheetDialogInfoPlace?.findViewById(R.id.buttonNotIGo)
+            val buttonOnwer = bottomSheetDialogInfoPlace?.findViewById<Button>(R.id.buttonUserOnwer)
+            if(mark?.userOwner?.phoneNumber == userCurrent?.phoneNumber) {
+                buttonIGo?.visibility = View.GONE
+                buttonOnwer?.visibility = View.VISIBLE
+            }
+
             Log.w("ID", listOfJoinUserPlaceMark.toString())
             if(userCurrent?.listPlaceMarkOfJoin?.contains(mark?.id.toString()) == true) {
                 buttonIGo?.visibility = View.GONE
